@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Il mio Cloud Resume</title>
+    <style>
+        body { background-color: #1a1a1a; color: #00ff00; font-family: monospace; text-align: center; padding-top: 50px; }
+        .counter { font-size: 2em; border: 2px solid #00ff00; padding: 10px; display: inline-block; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <h1>SYSTEM ONLINE</h1>
+    <p>Infrastruttura: Terraform + AWS</p>
+    <p>Backend: Rust + DynamoDB</p>
+    
+    <div class="counter" id="counter">Loading...</div>
+
+    <script>
+        const apiUrl = "https://ljjjjnmeisku6y3rvurca2rtii0prxjy.lambda-url.eu-central-1.on.aws/";
+
+        fetch(apiUrl)
+            .then(response => response.json())
+            .then(data => {
+                
+                document.getElementById('counter').innerText = "Visitors: " + data.count;
+            })
+            .catch(error => {
+                console.error('Errore:', error);
+                document.getElementById('counter').innerText = "Error loading data";
+            });
+    </script>
+</body>
+</html>

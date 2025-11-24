@@ -1,0 +1,7 @@
+backend/target/
+.terraform/
+*.tfstate
+*.tfstate.backup
+.terraform.lock.hcl
+.DS_Store
+.vscode/
