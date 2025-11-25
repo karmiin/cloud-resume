@@ -1,45 +1,315 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Il mio Cloud Resume</title>
-    <style>
-        body { background-color: #1a1a1a; color: #00ff00; font-family: monospace; text-align: center; padding-top: 50px; }
-        .counter { font-size: 2em; border: 2px solid #00ff00; padding: 10px; display: inline-block; margin-top: 20px; }
-    </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cloud Identity | Karmin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
 </head>
 <body>
-    <h1>SYSTEM ONLINE</h1>
-    <p>Infrastruttura: Terraform + AWS</p>
-    <p>Backend: Rust + DynamoDB</p>
-    <p>aggiornamento ci/cd</p>
-    <p id = "secondaApi"></p>
-    <p> sopra api</p>
-    
-    <div class="counter" id="counter">Loading...</div>
 
-    <script>
-        const apiSecond = "https://kwxlohpkohvycttgxn6edgbxx40cavrh.lambda-url.eu-central-1.on.aws/";
-        const apiUrl = "https://ljjjjnmeisku6y3rvurca2rtii0prxjy.lambda-url.eu-central-1.on.aws/";
+    <!-- Background Layer -->
+    <canvas id="nebula-canvas"></canvas>
+    <div class="nebula-glow"></div>
+    <div class="scanline"></div>
+    <div class="vignette"></div>
 
-        fetch(apiSecond)
-            .then(response => response.json())
-            .then(data => {
-                document.getElementById('secondaApi').innerText = data.message;
-            })
-            .catch(error => {
-                console.error('Errore:', error);
-                document.getElementById('secondaApi').innerText = "Error loading second API data";
-            });
-        fetch(apiUrl)
-            .then(response => response.json())
-            .then(data => {
+    <!-- Main Content Container -->
+    <main id="app">
+        
+        <!-- SECTION: HOME (Cloud Core) -->
+        <section id="home" class="active-section">
+            <div class="cloud-core-container">
+                <div class="cloud-globe" id="cloud-globe"></div>
+                <div class="hero-text">
+                    <h1 class="glitch" data-text="KARMIN">KARMIN</h1>
+                    <div class="role-badge">
+                        <span class="blink">_</span> Cloud Architect / DevOps Engineer
+                    </div>
+                    <p class="mission-statement">Architecting resilience in a distributed world.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION: ABOUT (Human Node) -->
+        <section id="about">
+            <div class="content-wrapper">
+                <div class="about-layout-wide">
+                    
+                    <div class="identity-header">
+                        <h2 class="full-name">KARMIN <span class="surname-highlight">COGNOME</span></h2>
+                        <div class="identity-badges">
+                            <span class="id-badge">LVL. 22</span>
+                            <span class="id-badge">MSc STUDENT</span>
+                            <span class="id-badge">CLOUD NATIVE</span>
+                        </div>
+                    </div>
+
+                    <div class="bio-terminal-container">
+                        <div class="terminal-bar">
+                            <span class="term-btn red"></span>
+                            <span class="term-btn yellow"></span>
+                            <span class="term-btn green"></span>
+                            <span class="term-title">user_profile.json</span>
+                        </div>
+                        <div class="bio-content">
+                            <p class="json-line"><span class="key">"current_status":</span> <span class="string">"Completing Master's Degree in CS"</span>,</p>
+                            <p class="json-line"><span class="key">"mission":</span> <span class="string">"Bridging the gap between complex distributed systems and elegant software engineering."</span>,</p>
+                            <p class="json-line"><span class="key">"philosophy":</span> <span class="string">"Code is poetry, infrastructure is the stage."</span>,</p>
+                            <p class="json-line"><span class="key">"description":</span> <span class="string">"Non sono solo un tecnico. Sono un costruttore di mondi digitali. La mia passione per il cloud computing nasce dalla volontà di creare sistemi che scalano oltre i limiti fisici. Quando non scrivo codice, alleno il corpo e la mente: bodybuilding per la disciplina, finanza per la strategia, anime per l'immaginazione."</span></p>
+                        </div>
+                    </div>
+
+                    <div class="info-grid">
+                        <div class="info-card focus-card">
+                            <h3><i class="fas fa-satellite-dish"></i> CURRENT FOCUS</h3>
+                            <ul>
+                                <li><span class="arrow">></span> Deep diving into <strong>Kubernetes Internals</strong></li>
+                                <li><span class="arrow">></span> Analyzing <strong>Market Trends</strong> & Crypto</li>
+                                <li><span class="arrow">></span> Reading: <em>"Designing Data-Intensive Applications"</em></li>
+                            </ul>
+                        </div>
+                        
+                        <div class="info-card interests-card">
+                            <h3><i class="fas fa-fingerprint"></i> PERSONALITY MODULES</h3>
+                            <div class="tags-container">
+                                <span class="tag">Bodybuilding</span>
+                                <span class="tag">Nutrition</span>
+                                <span class="tag">Stock Market</span>
+                                <span class="tag">Sci-Fi</span>
+                                <span class="tag">Rustacean</span>
+                                <span class="tag">Minimalism</span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION: BLOG (Thought Stream) -->
+        <section id="blog">
+            <div class="content-wrapper">
+                <h2 class="section-title">THOUGHT STREAM</h2>
                 
-                document.getElementById('counter').innerText = "Visitors: " + data.count;
-            })
-            .catch(error => {
-                console.error('Errore:', error);
-                document.getElementById('counter').innerText = "Error loading data";
-            });
-    </script>
+                <div class="blog-container">
+                    <!-- Featured Post (Latest) -->
+                    <div class="featured-post">
+                        <div class="post-status">
+                            <span class="blink-dot"></span> INCOMING TRANSMISSION
+                        </div>
+                        <h3 class="featured-title">L'evoluzione del Cloud: Oltre i Microservizi</h3>
+                        <div class="post-meta">25 NOV 2025 // ARCHITECTURE</div>
+                        <p class="post-excerpt">
+                            Stiamo assistendo a un cambio di paradigma. I microservizi non sono più la risposta a tutto. 
+                            Analizziamo come le architetture modulari monolitiche e il serverless 2.0 stanno ridefinendo il backend...
+                        </p>
+                        <a href="#" class="read-btn" id="open-blog-post">DECRYPT_FULL_TEXT <i class="fas fa-arrow-right"></i></a>
+                    </div>
+
+                    <!-- Recent Posts List -->
+                    <div class="recent-posts">
+                        <div class="post-item">
+                            <span class="post-date">10 NOV</span>
+                            <div class="post-info">
+                                <h4>Terraform State Management: Best Practices</h4>
+                                <span class="post-tag">DevOps</span>
+                            </div>
+                        </div>
+                        <div class="post-item">
+                            <span class="post-date">02 OCT</span>
+                            <div class="post-info">
+                                <h4>Perché ho scelto Rust per il mio backend</h4>
+                                <span class="post-tag">Coding</span>
+                            </div>
+                        </div>
+                        <div class="post-item">
+                            <span class="post-date">15 SEP</span>
+                            <div class="post-info">
+                                <h4>Disciplina e Codice: Lezioni dalla palestra</h4>
+                                <span class="post-tag">Lifestyle</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION: BLOG POST (Hidden by default) -->
+        <section id="blog-post">
+            <div class="content-wrapper">
+                <div class="blog-post-container">
+                    <a class="back-btn" id="back-to-blog"><i class="fas fa-arrow-left"></i> RETURN_TO_STREAM</a>
+                    
+                    <article>
+                        <header class="article-header">
+                            <h1 class="article-title">L'evoluzione del Cloud: Oltre i Microservizi</h1>
+                            <div class="article-meta">
+                                <span><i class="far fa-calendar"></i> 25 NOV 2025</span>
+                                <span><i class="fas fa-tag"></i> ARCHITECTURE</span>
+                                <span><i class="far fa-clock"></i> 5 MIN READ</span>
+                            </div>
+                        </header>
+                        
+                        <div class="article-content">
+                            <p>Il dogma dei microservizi ha dominato l'ultimo decennio. "Spezza tutto", ci hanno detto. "Disaccoppia". Ma mentre scalavamo le nostre architetture, abbiamo scalato anche la complessità.</p>
+                            
+                            <h2>Il Ritorno del Monolite Modulare</h2>
+                            <p>Non sto parlando del vecchio codice spaghetti. Sto parlando di <strong>Modular Monoliths</strong>. Applicazioni che vivono in un singolo deployable unit ma che mantengono confini stretti internamente.</p>
+                            
+                            <pre><code>// Esempio concettuale in Rust
+mod auth;
+mod payments;
+mod inventory;
+
+fn main() {
+    // I moduli comunicano via function calls, non gRPC
+    // Zero network latency. Type safety garantita.
+    let user = auth::verify_token(token)?;
+    inventory::check_stock(item_id)?;
+}</code></pre>
+
+                            <p>Quando hai bisogno di scalare un modulo specifico? Solo allora lo estrai. È un approccio pragmatico che riduce l'overhead operativo del 90% per le startup e i progetti personali.</p>
+
+                            <h2>Serverless 2.0</h2>
+                            <p>Con l'avvento di tecnologie come <strong>WebAssembly</strong> e runtime ultra-leggeri (pensa a Firecracker), il confine tra container e funzione si sta assottigliando. Il futuro non è gestire cluster Kubernetes per un blog personale, ma deployare logica pura ai bordi della rete.</p>
+                            
+                            <p><em>La complessità è il nemico della resilienza.</em></p>
+                        </div>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION: LIVE FEED (Telemetry HUD) -->
+        <section id="feed">
+            <div class="content-wrapper">
+                <h2 class="section-title">LIVE TELEMETRY</h2>
+                <div class="hud-grid">
+                    <div class="hud-panel code-stream">
+                        <div class="panel-header">GIT_STREAM_LOG</div>
+                        <ul class="log-list">
+                            <li><span class="timestamp">10:42</span> <span class="cmd">commit</span> Refactored lambda handler [main]</li>
+                            <li><span class="timestamp">09:15</span> <span class="cmd">push</span> Updated Terraform state</li>
+                            <li><span class="timestamp">Yesterday</span> <span class="cmd">merge</span> Feature/dark-mode -> master</li>
+                        </ul>
+                    </div>
+                    <div class="hud-panel system-status">
+                        <div class="panel-header">SYSTEM_STATUS</div>
+                        <div class="status-row">
+                            <span>VISITORS</span>
+                            <span id="visitor-counter" class="value-highlight">Loading...</span>
+                        </div>
+                        <div class="status-row">
+                            <span>MOOD</span>
+                            <span class="value-highlight">FOCUSED</span>
+                        </div>
+                        
+                        <!-- Spotify Widget -->
+                        <div class="spotify-widget">
+                            <div class="spotify-header">
+                                <i class="fab fa-spotify"></i> NOW_PLAYING
+                            </div>
+                            <div class="spotify-body">
+                                <div class="album-cover">
+                                    <div class="vinyl-groove"></div>
+                                </div>
+                                <div class="track-details">
+                                    <div class="track-name-scroller">
+                                        <span id="spotify-track">Neural Net Dreams</span>
+                                    </div>
+                                    <div class="artist-name" id="spotify-artist">Synthwave Boy</div>
+                                </div>
+                            </div>
+                            <div class="playback-bar">
+                                <div class="playback-progress"></div>
+                            </div>
+                        </div>
+
+                        <div class="audio-visualizer">
+                            <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION: SKILLS (Neural Network) -->
+        <section id="skills">
+            <div class="content-wrapper">
+                <h2 class="section-title">KNOWLEDGE GRAPH</h2>
+                <div id="skills-canvas-container">
+                    <div class="skill-node" style="top: 50%; left: 50%; transform: translate(-50%, -50%);">CORE</div>
+                    <div class="skill-node" style="top: 30%; left: 20%;">AWS</div>
+                    <div class="skill-node" style="top: 70%; left: 80%;">Rust</div>
+                    <div class="skill-node" style="top: 20%; left: 70%;">DevOps</div>
+                    <div class="skill-node" style="top: 80%; left: 30%;">Docker</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION: CONTACT (Secure Uplink) -->
+        <section id="contact">
+            <div class="content-wrapper">
+                <div class="terminal-window">
+                    <div class="terminal-header">
+                        <span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span>
+                        <span class="title">secure_uplink.sh</span>
+                    </div>
+                    <div class="terminal-body">
+                        <form id="contact-form">
+                            <div class="input-line">
+                                <span class="prompt">user@cloud:~$</span>
+                                <input type="text" placeholder="Enter your name" required>
+                            </div>
+                            <div class="input-line">
+                                <span class="prompt">user@cloud:~$</span>
+                                <input type="email" placeholder="Enter your email" required>
+                            </div>
+                            <div class="input-line">
+                                <span class="prompt">user@cloud:~$</span>
+                                <textarea placeholder="Enter message payload..." rows="4" required></textarea>
+                            </div>
+                            <button type="submit" class="cmd-btn">EXECUTE_SEND</button>
+                        </form>
+                        <div class="social-links">
+                            <a href="#">LINKEDIN</a>
+                            <a href="#">GITHUB</a>
+                            <a href="#">RESUME.PDF</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Navigation Dock -->
+    <nav class="dock">
+        <button class="dock-item active" data-target="home" title="Home">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+        </button>
+        <button class="dock-item" data-target="about" title="About">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+        </button>
+        <button class="dock-item" data-target="blog" title="Blog">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
+        </button>
+        <button class="dock-item" data-target="feed" title="Live Feed">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+        </button>
+        <button class="dock-item" data-target="skills" title="Skills">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+        </button>
+        <button class="dock-item" data-target="contact" title="Contact">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+        </button>
+    </nav>
+
+    <script src="script.js"></script>
 </body>
 </html>

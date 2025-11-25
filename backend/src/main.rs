@@ -1,49 +1,82 @@
-use lambda_http::{run, service_fn, Body, Error, Request, Response};
-use aws_config::BehaviorVersion;
-use aws_sdk_dynamodb::{Client, types::{AttributeValue, ReturnValue}};
+use axum::{
+    routing::{get, post},
+    Router, Json, extract::State,
+};
+use lambda_http::{run, Error};
+use tower_http::cors::{Any, CorsLayer};
+use std::sync::Arc;
 
-async fn function_handler(_event: Request) -> Result<Response<Body>, Error> {
-    // 1. Carichiamo la configurazione AWS (prende i permessi dal Ruolo IAM che abbiamo creato con Terraform)
-    let config = aws_config::load_defaults(BehaviorVersion::latest()).await;
-    let client = Client::new(&config);
+struct AppState{
 
-    // 2. Chiamata a DynamoDB: "Aggiorna la riga dove id='count', sommando 1 a 'visits'"
-    // Usiamo "UpdateItem" perché è atomico (non si incarta se 100 persone cliccano insieme)
-    let res = client
-        .update_item()
-        .table_name("VisitorCount")
-        .key("id", AttributeValue::S("count".to_string()))
-        .update_expression("ADD visits :incr")
-        .expression_attribute_values(":incr", AttributeValue::N("1".to_string()))
-        .return_values(ReturnValue::UpdatedNew)
-        .send()
-        .await;
-
-    // 3. Estraiamo il numero dalla risposta (gestione errori molto base)
-    let visit_count = match res {
-        Ok(output) => {
-            let attributes = output.attributes.unwrap_or_default();
-            let val = attributes.get("visits").unwrap();
-            val.as_n().unwrap().to_string() // Converte il numero DynamoDB in stringa
-        },
-        Err(err) => {
-            format!("Errore DB: {:?}", err)
-        }
-    };
-
-    // 4. Creiamo un JSON da restituire al browser
-    let json_response = format!("{{ \"count\": {} }}", visit_count);
-
-    let resp = Response::builder()
-        .status(200)
-        .header("content-type", "application/json") // Importante per il CORS!
-        .body(json_response.into())
-        .map_err(Box::new)?;
-
-    Ok(resp)
 }
 
 #[tokio::main]
 async fn main() -> Result<(), Error> {
-    run(service_fn(function_handler)).await
+    let shared_state = Arc::new(AppState{});
+
+    let cors = CorsLayer::new()
+    .allow_origin(Any)
+    .allow_methods(Any)
+    .allow_headers(Any);
+
+    let app = Router::new()
+        .route("/",get(root_handler))
+        .route("/api/visitors", post(visitors_handler))
+        .route("api/github",get(github_handler))
+        .route("api/spotify",get(spotify_handler))
+        .route("api/email", post(email_handler))
+        .route("/api/blog", get(blog_handler))
+        .layer(cors)
+        .with_state(shared_state);
+
+    run(app).await
 }
+
+async fn root_handler() -> &'static str {
+    "Backend Rust Online!"
+}
+
+async fn visitors_handler() -> Json<serde_json::Value> {
+    //prende da dynamo
+    Json(serde_json::json!({"visitors": 10}))
+}
+
+async fn github_handler() -> Json<serde_json::Value> {
+
+    let client = reqwest::Client::new();
+    //username usa variaible di ambiente
+
+    let username = "karmiin";
+
+
+    let res = client
+        .get(format!("https://api.github.com/users/{}/events/public", username))
+        .header("User-Agent", "Rust-Lambda-Backend")
+        .send()
+        .await;
+
+     match res {
+        Ok(response) => {
+            let events: Vec<serde_json::Value> = response.json().await.unwrap_or_default();
+            let recent = events.into_iter().take(5).collect::<Vec<_>>();
+            Json(serde_json::json!(recent))
+        }
+        Err(_) => Json(serde_json::json!({"error": "Impossibile contattare GitHub"})),
+    }
+}
+
+async fn spotify_handler() -> Json<serde_json::Value> {
+    //prende da spotify
+    Json(serde_json::json!({"currently_playing": "Song Title", "artist": "Artist Name"}))
+}
+
+async fn email_handler() -> Json<serde_json::Value> {
+    //invia email
+    Json(serde_json::json!({"status": "Email sent successfully"}))
+}
+
+async fn blog_handler() -> Json<serde_json::Value> {
+    //prende da dynamo
+    Json(serde_json::json!({"posts": [{"title": "First Post", "date": "2024-01-01"}, {"title": "Second Post", "date": "2024-02-01"}]}))
+}
+
