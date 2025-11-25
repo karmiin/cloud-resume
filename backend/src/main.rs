@@ -58,8 +58,31 @@ async fn github_handler() -> Json<serde_json::Value> {
      match res {
         Ok(response) => {
             let events: Vec<serde_json::Value> = response.json().await.unwrap_or_default();
-            let recent = events.into_iter().take(5).collect::<Vec<_>>();
+            let recent: Vec<serde_json::Value> = events.into_iter().take(5)
+                .map(|event| {
+                    let actor = event["actor"]["login"].as_str().unwrap_or_default();
+                    let repo = event["repo"]["name"].as_str().unwrap_or_default();
+                    let event_type = event["type"].as_str().unwrap_or_default();
+                
+                let message = if event_type == "PushEvent" {
+                    event["payload"]["commits"]
+                    .get(0)
+                    .and_then(|c| c["message"].as_str())
+                    .unwrap_or("Pushed updates")
+                    .to_string()
+                }else{
+                    event_type.replace("Event", "")
+                };
+                serde_json::json!({
+                    "actor": actor,
+                    "repo": repo,
+                    "event_type": event_type,
+                    "message": message
+                })
+                })
+                .collect();
             Json(serde_json::json!(recent))
+            
         }
         Err(_) => Json(serde_json::json!({"error": "Impossibile contattare GitHub"})),
     }
