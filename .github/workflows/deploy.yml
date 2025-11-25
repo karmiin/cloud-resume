@@ -32,6 +32,8 @@ jobs:
           platform: linux
           arch: x86_64
       
+      - name: Install Zig
+        run: pip3 install ziglang
       # 3. Compila il Backend (crea lo zip)
       - name: Build Backend
         run: |
