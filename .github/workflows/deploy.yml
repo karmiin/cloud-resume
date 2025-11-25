@@ -57,7 +57,7 @@ jobs:
       - name: Deploy Frontend to S3
         run: |
           BUCKET_NAME=$(terraform output -raw resume_bucket_name) # Assicurati di avere questo output nel main.tf!
-          aws s3 cp index.html s3://$BUCKET_NAME/index.html
+          aws s3 cp index.html s3://$BUCKET_NAME --delete --exclude ".git/*" --exclude "backend/*" --exclude "*.tf" --exclude ".github/*" --exclude "*.tfstate" --exclude ".vscode/*"
           
       # 8. Invalida la Cache CloudFront (così vedi subito le modifiche)
       - name: Invalidate CloudFront
