@@ -3,7 +3,7 @@ name: Deploy Cloud Resume
 on:
   push:
     branches:
-      - main # O "master", controlla come si chiama il tuo branch
+      - master # O "master", controlla come si chiama il tuo branch
 
 permissions:
   contents: read
