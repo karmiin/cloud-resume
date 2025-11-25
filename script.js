@@ -3,6 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- NAVIGATION LOGIC ---
     const dockItems = document.querySelectorAll('.dock-item');
     const sections = document.querySelectorAll('section');
+    const API_URL = "https://ljjjjnmeisku6y3rvurca2rtii0prxjy.lambda-url.eu-central-1.on.aws";
 
     dockItems.forEach(item => {
         item.addEventListener('click', () => {
@@ -105,9 +106,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- VISITOR COUNTER ---
     const counterElement = document.getElementById('visitor-counter');
-    const apiUrl = "https://ljjjjnmeisku6y3rvurca2rtii0prxjy.lambda-url.eu-central-1.on.aws/";
 
-    fetch(apiUrl)
+    fetch(API_URL + '/api/visitors')
         .then(response => response.json())
         .then(data => {
             counterElement.innerText = data.count || "Error";
@@ -223,7 +223,7 @@ async function fetchGithubActivity(){
     const logList = document.querySelector('.log-list');
 
     try{
-        const response = await fetch('/api/github')
+        const response = await fetch(API_URL + '/api/github')
 
         if(!response.ok)
             throw new Error('error ' + response.status);
@@ -273,7 +273,7 @@ async function fetchSpotifyStatus() {
     const statusIcon = widget.querySelector('.status-icon'); // Se hai un'icona di stato
 
     try {
-        const response = await fetch('/api/spotify');
+        const response = await fetch(API_URL +'/api/spotify');
         const data = await response.json();
 
         if (data.is_playing) {
