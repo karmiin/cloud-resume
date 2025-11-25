@@ -166,6 +166,7 @@ document.addEventListener('DOMContentLoaded', () => {
     `;
     document.head.appendChild(styleSheet);
 
+    fetchGithubActivity();
 });
 
     // --- BLOG NAVIGATION ---
@@ -216,3 +217,45 @@ if (trackEl && artistEl) {
     // Change track every 30 seconds (simulating song end)
     setInterval(updateTrack, 30000);
 }
+
+async function fetchGithubActivity(){
+    const logList = document.querySelector('.log-list');
+
+    try{
+        const response = await fetch('/api/github')
+
+        if(!response.ok)
+            throw new Error('error ' + response.status);
+
+        const data = await response.json();
+
+        if(!Array.isArray(data)) return;
+
+        logList.innerHTML = '';
+
+        data.forEach((event, index) =>{
+            const actionType = event.type.replace('Event', '').toUpperCase();
+            const repoName = event.repo;
+            const message = event.message;
+
+            const li = document.createElement('li');
+            li.innerHTML = `
+            <span class="timestamp">${actionType}</span>
+            <span class="cmd">${repoName}</span>
+            ${message}
+            `;
+
+            li.style.animation = `fadeIn 0.5s ease forwards ${index * 0.2}s`;
+            li.style.opacity = 0;
+            
+            logList.appendChild(li);
+        });
+
+    } catch (error){
+        console.error('Failed to fetch GitHub activity:', error);
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    fetchGithubActivity();
+});

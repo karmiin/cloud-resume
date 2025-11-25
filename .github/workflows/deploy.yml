@@ -58,7 +58,7 @@ jobs:
         run: |
           BUCKET_NAME=$(terraform output -raw resume_bucket_name) # Assicurati di avere questo output nel main.tf!
           aws s3 cp index.html s3://$BUCKET_NAME/
-          aws s3 cp styles.css s3://$BUCKET_NAME/
+          aws s3 cp style.css s3://$BUCKET_NAME/
           aws s3 cp script.js s3://$BUCKET_NAME/
           
       # 8. Invalida la Cache CloudFront (così vedi subito le modifiche)
