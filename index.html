@@ -11,12 +11,24 @@
     <h1>SYSTEM ONLINE</h1>
     <p>Infrastruttura: Terraform + AWS</p>
     <p>Backend: Rust + DynamoDB</p>
+    <p id = "secondaApi"></p>
+    <p> sopra api</p>
     
     <div class="counter" id="counter">Loading...</div>
 
     <script>
+        const apiSecond = "https://kwxlohpkohvycttgxn6edgbxx40cavrh.lambda-url.eu-central-1.on.aws/";
         const apiUrl = "https://ljjjjnmeisku6y3rvurca2rtii0prxjy.lambda-url.eu-central-1.on.aws/";
 
+        fetch(apiSecond)
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('secondaApi').innerText = data.message;
+            })
+            .catch(error => {
+                console.error('Errore:', error);
+                document.getElementById('secondaApi').innerText = "Error loading second API data";
+            });
         fetch(apiUrl)
             .then(response => response.json())
             .then(data => {
