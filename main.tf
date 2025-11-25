@@ -152,8 +152,8 @@ resource "aws_lambda_function" "rust_backend" {
   function_name = "rust-backend-function"
 
   # Percorso dello zip creato da cargo lambda
-  filename         = "${path.module}/backend/target/lambda/counter/bootstrap.zip"
-  source_code_hash = filebase64sha256("${path.module}/backend/target/lambda/counter/bootstrap.zip")
+  filename         = "${path.module}/backend/target/lambda/backend/bootstrap.zip"
+  source_code_hash = filebase64sha256("${path.module}/backend/target/lambda/backend/bootstrap.zip")
 
   # Configurazione Runtime per Rust (che su AWS si chiama "provided.al2")
   handler       = "bootstrap"
@@ -237,36 +237,6 @@ resource "aws_iam_policy" "lambda_dynamo_policy" {
 resource "aws_iam_role_policy_attachment" "lambda_dynamo_attach" {
   role       = aws_iam_role.lambda_exec_role.name
   policy_arn = aws_iam_policy.lambda_dynamo_policy.arn
-}
-
-resource "aws_lambda_function" "rust_backend_2"{
-  function_name = "rust-backend-function-2"
-
-  filename = "${path.module}/backend/target/lambda/second/bootstrap.zip"
-  source_code_hash = filebase64sha256("${path.module}/backend/target/lambda/second/bootstrap.zip")
-
-  handler       = "bootstrap"
-  runtime       = "provided.al2023"
-  architectures = ["x86_64"]
-  role = aws_iam_role.lambda_exec_role.arn
-}
-
-resource "aws_lambda_function_url" "backend_2" {
-  function_name      = aws_lambda_function.rust_backend_2.function_name
-  authorization_type = "NONE" # Pubblico
-
-  cors {
-    allow_credentials = true
-    allow_origins     = ["*"] # Per ora permettiamo a tutti di chiamarla
-    allow_methods     = ["*"]
-    allow_headers     = ["date", "keep-alive"]
-    expose_headers    = ["keep-alive", "date"]
-    max_age           = 86400
-  }
-}
-
-output "api_url_second" {
-  value = aws_lambda_function_url.backend_2.function_url
 }
 
 output "resume_bucket_name" {
