@@ -161,6 +161,25 @@ resource "aws_lambda_function" "rust_backend" {
   architectures = ["x86_64"] # O "arm64" se hai compilato su Mac M1/M2/M3
 
   role = aws_iam_role.lambda_exec_role.arn
+  environment {
+    variables = {
+      SPOTIFY_CLIENT_ID = var.spotify_client_id
+      SPOTIFY_CLIENT_SECRET = var.spotify_client_secret
+      SPOTIFY_REFRESH_TOKEN = var.spotify_refresh_token
+    }
+  }
+}
+variable "spotify_client_id" {
+  type = string
+  sensitive = true
+}
+variable "spotify_client_secret" {
+  type = string
+  sensitive = true
+}
+variable "spotify_refresh_token" {
+  type = string
+  sensitive = true
 }
 
 # 4. Function URL (Il modo più veloce per esporre la Lambda su internet senza API Gateway complesso)

@@ -167,6 +167,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.head.appendChild(styleSheet);
 
     fetchGithubActivity();
+    fetchSpotifyStatus();
 });
 
     // --- BLOG NAVIGATION ---
@@ -259,3 +260,47 @@ async function fetchGithubActivity(){
 document.addEventListener('DOMContentLoaded', () => {
     fetchGithubActivity();
 });
+
+
+async function fetchSpotifyStatus() {
+    const widget = document.querySelector('.spotify-widget');
+    if (!widget) return;
+
+    // Selettori interni al widget (assicurati che corrispondano al tuo HTML)
+    const artImg = widget.querySelector('.album-art img');
+    const titleEl = widget.querySelector('.song-title');
+    const artistEl = widget.querySelector('.artist-name');
+    const statusIcon = widget.querySelector('.status-icon'); // Se hai un'icona di stato
+
+    try {
+        const response = await fetch('/api/spotify');
+        const data = await response.json();
+
+        if (data.is_playing) {
+            // Aggiorna UI con i dati della canzone
+            if (artImg) artImg.src = data.album_art;
+            if (titleEl) titleEl.textContent = data.title;
+            if (artistEl) artistEl.textContent = data.artist;
+            
+            // Rendi il widget cliccabile per aprire la canzone
+            widget.style.cursor = 'pointer';
+            widget.onclick = () => window.open(data.url, '_blank');
+
+            // Attiva animazioni (es. rotazione vinile)
+            widget.classList.add('playing');
+            if (artImg) artImg.style.animationPlayState = 'running';
+            
+        } else {
+            // Stato Offline / Pausa
+            if (titleEl) titleEl.textContent = "Offline / Paused";
+            if (artistEl) artistEl.textContent = "Spotify";
+            
+            widget.classList.remove('playing');
+            if (artImg) artImg.style.animationPlayState = 'paused';
+            widget.onclick = null;
+        }
+    } catch (error) {
+        console.error("Errore Spotify:", error);
+        if (titleEl) titleEl.textContent = "Connection Lost";
+    }
+}
