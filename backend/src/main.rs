@@ -33,9 +33,9 @@ async fn main() -> Result<(), Error> {
     let app = Router::new()
         .route("/",get(root_handler))
         .route("/api/visitors", post(visitors_handler))
-        .route("api/github",get(github_handler))
-        .route("api/spotify",get(spotify_handler))
-        .route("api/email", post(email_handler))
+        .route("/api/github",get(github_handler))
+        .route("/api/spotify",get(spotify_handler))
+        .route("/api/email", post(email_handler))
         .route("/api/blog", get(blog_handler))
         .layer(cors)
         .with_state(shared_state);
