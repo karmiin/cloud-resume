@@ -17,10 +17,3 @@ axum = "0.8.7"
 tower-http = { version = "0.6.7", features = ["cors"] }
 tower = { version = "0.5.2", features = ["util"] }
 openssl = { version = "0.10", features = ["vendored"] }
-[[bin]]
-name = "counter"
-path = "src/main.rs"
-
-[[bin]]
-name = "second"
-path = "src/second.rs"
