@@ -3,52 +3,62 @@ name: Deploy Cloud Resume
 on:
   push:
     branches:
-      - master
+      - main # O "master", controlla come si chiama il tuo branch
 
 permissions:
-     contents: read
+  contents: read
 
 jobs:
-     deploy:
-          name: Deploy Infrastracture and Website
-          runs-on: ubuntu-latest
+  deploy:
+    name: Deploy Infrastructure & Website
+    runs-on: ubuntu-latest
+    
+    # Impostiamo le variabili d'ambiente per Terraform
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_REGION: "eu-central-1"
 
-     env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_REGION: eu-central-1
-     
-     steps:
-          - name: Checkout code
-               uses: actions/checkout@v4
+    steps:
+      # 1. Scarica il codice dal repo
+      - name: Checkout Code
+        uses: actions/checkout@v4
 
-               - name: Setup Rust e Cargo Lambda
-               uses: jaxxstorm/setup-rust-cargo-lambda@v1.10.0
-               with:
-                    repo: cargo-lambda/cargo-lambda
-                    platform: linux
-                    arch: x86_64
-               
-               - name: Build Backend
-               run: |
-                    cd backend
-                    cargo lambda build --release --output-format zip
+      # 2. Installa Rust + Cargo Lambda
+      - name: Setup Rust & Cargo Lambda
+        uses: jaxxstorm/action-install-gh-release@v1.10.0
+        with:
+          repo: cargo-lambda/cargo-lambda
+          platform: linux
+          arch: x86_64
+      
+      # 3. Compila il Backend (crea lo zip)
+      - name: Build Backend
+        run: |
+          cd backend
+          cargo lambda build --release --output-format zip
+      
+      # 4. Installa Terraform
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
 
-               - name: Setup Terraform
-               uses: hashicorp/setup-terraform@v3
+      # 5. Inizializza Terraform (si collega al bucket S3 dello stato)
+      - name: Terraform Init
+        run: terraform init
 
-               - name: Terraform Init
-               run: terraform init
+      # 6. Applica le modifiche (Infrastruttura + Backend Zip)
+      - name: Terraform Apply
+        run: terraform apply -auto-approve
 
-               - name: Terraform Apply
-               run: terraform apply -auto-approve
-
-               - name: Deploy Frontend to S3
-               run: |
-                    BUCKET_NAME=$(terraform output -raw resume_bucket_name)
-                    aws s3 cp index.html s3://$BUCKET_NAME/index.html
-
-               - name: Invalidate CloudFront Cache
-               run: |
-                    DIST_ID=$(terraform output -raw cloudfront_id)
-                    aws cloudfront create-invalidation --distribution-id $DIST_ID --paths "/*"
+      # 7. Carica il Frontend su S3
+      # Recuperiamo il nome del bucket dall'output di Terraform per non scriverlo a mano
+      - name: Deploy Frontend to S3
+        run: |
+          BUCKET_NAME=$(terraform output -raw resume_bucket_name) # Assicurati di avere questo output nel main.tf!
+          aws s3 cp index.html s3://$BUCKET_NAME/index.html
+          
+      # 8. Invalida la Cache CloudFront (così vedi subito le modifiche)
+      - name: Invalidate CloudFront
+        run: |
+          DIST_ID=$(terraform output -raw cloudfront_id) # Assicurati di avere questo output nel main.tf!
+          aws cloudfront create-invalidation --distribution-id $DIST_ID --paths "/*"
