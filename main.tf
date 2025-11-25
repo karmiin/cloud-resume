@@ -5,6 +5,11 @@ terraform {
       version = "~> 5.0"
     }
   }
+  backend "s3" {
+    bucket = "terraform-state-cloud-resume-lock"
+    key = "cloud-resume/terraform.tfstate"
+    region = "eu-central-1"
+  }
 }
 
 provider "aws" {
@@ -264,6 +269,11 @@ output "api_url_second" {
   value = aws_lambda_function_url.backend_2.function_url
 }
 
-output "s3_bucket_name" {
-  value = aws_s3_bucket.resume_bucket.bucket
+output "resume_bucket_name" {
+  value = aws_s3_bucket.resume_bucket.id
+}
+
+//output cloudfront id
+output "cloudfront_id" {
+  value = aws_cloudfront_distribution.s3_distribution.id
 }

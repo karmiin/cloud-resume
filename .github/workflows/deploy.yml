@@ -1,0 +1,54 @@
+name: Deploy Cloud Resume
+
+on:
+  push:
+    branches:
+      - master
+
+permissions:
+     contents: read
+
+jobs:
+     deploy:
+          name: Deploy Infrastracture and Website
+          runs-on: ubuntu-latest
+
+     env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: eu-central-1
+     
+     steps:
+          - name: Checkout code
+               uses: actions/checkout@v4
+
+               - name: Setup Rust e Cargo Lambda
+               uses: jaxxstorm/setup-rust-cargo-lambda@v1.10.0
+               with:
+                    repo: cargo-lambda/cargo-lambda
+                    platform: linux
+                    arch: x86_64
+               
+               - name: Build Backend
+               run: |
+                    cd backend
+                    cargo lambda build --release --output-format zip
+
+               - name: Setup Terraform
+               uses: hashicorp/setup-terraform@v3
+
+               - name: Terraform Init
+               run: terraform init
+
+               - name: Terraform Apply
+               run: terraform apply -auto-approve
+
+               - name: Deploy Frontend to S3
+               run: |
+                    BUCKET_NAME=$(terraform output -raw resume_bucket_name)
+                    aws s3 cp index.html s3://$BUCKET_NAME/index.html
+
+               - name: Invalidate CloudFront Cache
+               run: |
+                    DIST_ID=$(terraform output -raw cloudfront_id)
+                    aws cloudfront create-invalidation --distribution-id $DIST_ID --paths "/*"
