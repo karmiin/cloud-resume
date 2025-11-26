@@ -170,6 +170,8 @@ resource "aws_lambda_function" "rust_backend" {
       SPOTIFY_CLIENT_ID = var.spotify_client_id
       SPOTIFY_CLIENT_SECRET = var.spotify_client_secret
       SPOTIFY_REFRESH_TOKEN = var.spotify_refresh_token
+      TELEGRAM_TOKEN = var.telegram_token
+      TELEGRAM_CHAT_ID = var.telegram_chat_id
     }
   }
 }
@@ -306,3 +308,11 @@ data "aws_route53_zone" "main"{
   name = "karmin.dev"
 }
 
+variable "telegram_token" {
+  type = string
+  sensitive = true
+}
+variable "telegram_chat_id" {
+  type = string
+  sensitive = true
+}

@@ -36,7 +36,7 @@ async fn main() -> Result<(), Error> {
         .route("/api/visitors", post(visitors_handler))
         .route("/api/github",get(github_handler))
         .route("/api/spotify",get(spotify_handler))
-        .route("/api/email", post(email_handler))
+        .route("/api/contact", post(contact_handler))
         .route("/api/blog", get(blog_handler))
         //.layer(cors)
         .with_state(shared_state);
@@ -187,9 +187,44 @@ async fn spotify_handler(State(state): State<Arc<AppState>>) -> Json<serde_json:
     Json(serde_json::json!({"is_playing": false}))
 }
 
-async fn email_handler() -> Json<serde_json::Value> {
-    //invia email
-    Json(serde_json::json!({"status": "Email sent successfully"}))
+
+#[derive(Deserialize)]
+struct ContactForm{
+    name: String,
+    email: String,
+    message: String,
+}
+
+async fn contact_handler(State(state): State<Arc<AppState>>,Json(payload): Json<ContactForm>) -> Json<serde_json::Value> {
+    
+    let token = env::var("TELEGRAM_TOKEN").unwrap_or_default();
+    let chat_id = env::var("TELEGRAM_CHAT_ID").unwrap_or_default();
+    if token.is_empty() || chat_id.is_empty() {
+        return Json(serde_json::json!({"success": "false", "error": "Telegram credentials missing"}));
+    }
+
+    let text = format!(
+        "Nuovo Contatto dal Sito*\n\n *Nome:* {}\n *Email:* {}\n *Messaggio:* \n{}",
+        payload.name, payload.email, payload.message
+    );
+
+    let url = format!("https://api.telegram.org/bot{}/sendMessage", token);
+
+    let param = [
+        ("chat_id", chat_id),
+        ("text", text),
+        ("parse_mode", "Markdown".to_string()),
+    ];
+
+    let res = state.http_client.post(&url)
+        .form(&param)
+        .send()
+        .await;
+
+    match res{
+        Ok(_) => Json(serde_json::json!({"success": "true"})),
+        Err(_) => return Json(serde_json::json!({"success": "false", "error": "Failed to send message"})),
+    }
 }
 
 #[derive(Serialize,Deserialize)]
