@@ -243,6 +243,7 @@ async fn contact_handler(State(state): State<Arc<AppState>>,Json(payload): Json<
         Err(err) => {
             println!("ERRORE: {:?}",err);
              Json(serde_json::json!({"success": "false", "error": "Failed to send message"}))
+        }
     }
 }
 
