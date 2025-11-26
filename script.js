@@ -182,23 +182,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     fetchGithubActivity();
     fetchSpotifyStatus();
+    fetchBlog();
 });
 
     // --- BLOG NAVIGATION ---
     const blogSection = document.getElementById('blog');
     const blogPostSection = document.getElementById('blog-post');
-    const openPostBtn = document.getElementById('open-blog-post');
     const backToBlogBtn = document.getElementById('back-to-blog');
 
-    if (openPostBtn && backToBlogBtn) {
-        openPostBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            // Hide current section (blog)
-            blogSection.classList.remove('active-section');
-            // Show post section
-            blogPostSection.classList.add('active-section');
-        });
-
+    if (backToBlogBtn) {
         backToBlogBtn.addEventListener('click', (e) => {
             e.preventDefault();
             blogPostSection.classList.remove('active-section');
@@ -293,3 +285,127 @@ async function fetchSpotifyStatus() {
         if (titleEl) titleEl.textContent = "Connection Lost";
     }
 }
+
+
+
+async function fetchBlog() {
+    const blogContainer = document.querySelector('.blog-container');
+    if (!blogContainer) return;
+
+    try {
+        API_URL = "https://ljjjjnmeisku6y3rvurca2rtii0prxjy.lambda-url.eu-central-1.on.aws";
+        const res = await fetch(`${API_URL}/api/blog`);
+        const data = await res.json();
+        
+        // Handle both direct array (as per main.rs) and potential object wrapper
+        const posts = Array.isArray(data) ? data : (data.posts || []);
+
+        if (!Array.isArray(posts)) {
+            console.error("Expected array of posts, got:", data);
+            blogContainer.innerHTML = "<p>Error decoding transmission signal.</p>";
+            return;
+        }
+
+        if (posts.length === 0) {
+            blogContainer.innerHTML = "<p>No transmissions received.</p>";
+            return;
+        }
+
+        const featuredPost = posts[0];
+        const recentPosts = posts.slice(1);
+
+        // Helper to format date
+        const formatDate = (dateString) => {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).toUpperCase();
+        };
+        
+        // Helper to get category
+        const getCategory = (labels) => {
+             if (!labels || !Array.isArray(labels)) return 'GENERAL';
+             const catLabel = labels.find(l => l.name.startsWith('category:'));
+             return catLabel ? catLabel.name.replace('category:', '').toUpperCase() : 'GENERAL';
+        };
+
+        let html = '';
+
+        // Featured Post
+        if (featuredPost) {
+            const category = getCategory(featuredPost.labels);
+            const date = formatDate(featuredPost.created_at);
+            const excerpt = featuredPost.body ? featuredPost.body.substring(0, 150) + "..." : "";
+
+            html += `
+                <div class="featured-post">
+                    <div class="post-status">
+                        <span class="blink-dot"></span> INCOMING TRANSMISSION
+                    </div>
+                    <h3 class="featured-title">${featuredPost.title}</h3>
+                    <div class="post-meta">${date} // ${category}</div>
+                    <p class="post-excerpt">
+                        ${excerpt}
+                    </p>
+                    <a href="#" class="read-btn" onclick="openBlogPost(${JSON.stringify(featuredPost).replace(/"/g, '&quot;')})">DECRYPT_FULL_TEXT <i class="fas fa-arrow-right"></i></a>
+                </div>
+            `;
+        }
+
+        // Recent Posts
+        if (recentPosts.length > 0) {
+            html += '<div class="recent-posts">';
+            recentPosts.forEach(post => {
+                const category = getCategory(post.labels);
+                const date = new Date(post.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }).toUpperCase();
+                
+                html += `
+                    <div class="post-item" onclick="openBlogPost(${JSON.stringify(post).replace(/"/g, '&quot;')})">
+                        <span class="post-date">${date}</span>
+                        <div class="post-info">
+                            <h4>${post.title}</h4>
+                            <span class="post-tag">${category}</span>
+                        </div>
+                    </div>
+                `;
+            });
+            html += '</div>';
+        }
+
+        blogContainer.innerHTML = html;
+
+    } catch (error) {
+        console.error("Blog Error:", error);
+        blogContainer.innerHTML = "<p>Signal lost. Cannot retrieve transmissions.</p>";
+    }
+}
+
+// Function to open blog post
+window.openBlogPost = function(post) {
+    const blogSection = document.getElementById('blog');
+    const blogPostSection = document.getElementById('blog-post');
+    
+    // Populate content
+    const articleTitle = blogPostSection.querySelector('.article-title');
+    const articleMeta = blogPostSection.querySelector('.article-meta');
+    const articleContent = blogPostSection.querySelector('.article-content');
+
+    articleTitle.textContent = post.title;
+    
+    const date = new Date(post.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).toUpperCase();
+    const labels = post.labels || [];
+    const category = labels.find(l => l.name.startsWith('category:'))?.name.replace('category:', '').toUpperCase() || 'GENERAL';
+    
+    articleMeta.innerHTML = `
+        <span><i class="far fa-calendar"></i> ${date}</span>
+        <span><i class="fas fa-tag"></i> ${category}</span>
+        <span><i class="far fa-clock"></i> ${Math.ceil(post.body.length / 500)} MIN READ</span>
+    `;
+
+    articleContent.innerHTML = marked.parse(post.body);
+
+    // Switch sections
+    blogSection.classList.remove('active-section');
+    blogPostSection.classList.add('active-section');
+    
+    // Scroll to top
+    blogPostSection.scrollTop = 0;
+};

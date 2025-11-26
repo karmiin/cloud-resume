@@ -7,7 +7,7 @@ use aws_config::BehaviorVersion;
 use lambda_http::{run, Error};
 use tower_http::cors::{Any, CorsLayer};
 use std::sync::Arc;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use std::env;
 struct AppState{
     dynamo_client: aws_sdk_dynamodb::Client,
@@ -192,8 +192,41 @@ async fn email_handler() -> Json<serde_json::Value> {
     Json(serde_json::json!({"status": "Email sent successfully"}))
 }
 
-async fn blog_handler() -> Json<serde_json::Value> {
-   
-    Json(serde_json::json!({"posts": [{"title": "First Post", "date": "2024-01-01"}, {"title": "Second Post", "date": "2024-02-01"}]}))
+#[derive(Serialize,Deserialize)]
+struct GitHubIssue{
+    title: String,
+    body: Option<String>,
+    created_at: String,
+    labels: Vec<GitHubLabel>,
+    html_url: String,
+}
+#[derive(Serialize,Deserialize)]
+struct GitHubLabel{
+    name: String,
+}
+
+async fn blog_handler(State(state): State<Arc<AppState>>) -> Json<serde_json::Value> {
+    
+    let owner = "karmiin";
+    let repo = "cloud-resume";
+
+    let url = format!(
+        "https://api.github.com/repos/{}/{}/issues?labels=published&state=open",
+        owner, repo
+    );
+
+    let res = state.http_client
+    .get(&url)
+    .header("User-Agent", "Rust-Cloud-Resume")
+    .send()
+    .await;
+
+    match  res{
+        Ok(resp) => {
+            let issues: Vec<GitHubIssue> = resp.json().await.unwrap_or_default();
+            Json(serde_json::json!(issues))
+        }
+        Err(_) => Json(serde_json::json!({"error": "Impossibile contattare GitHub"})),
+    }
 }
 
