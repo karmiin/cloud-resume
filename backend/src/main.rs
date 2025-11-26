@@ -199,14 +199,8 @@ async fn contact_handler(State(state): State<Arc<AppState>>,Json(payload): Json<
     
     let token = env::var("TELEGRAM_TOKEN").unwrap_or_default();
     let chat_id = env::var("TELEGRAM_CHAT_ID").unwrap_or_default();
-
-    let masked_token = if token.len() >5 { &token[..5] } else { &token };
-    println!("DEBUG: Token loded stars with '{}...'", masked_token);
-    println!("DEBUG: Chat ID loaded '{}'", chat_id);
-    println!("DEBUG: Payload received: Name: '{}', Email: '{}', Message: '{}'", payload.name, payload.email, payload.message);
-
+    
     if token.is_empty() || chat_id.is_empty() {
-        println!("ERROR: Telegram credentials are missing.");
         return Json(serde_json::json!({"success": "false", "error": "Telegram credentials missing"}));
     }
 
@@ -220,7 +214,6 @@ async fn contact_handler(State(state): State<Arc<AppState>>,Json(payload): Json<
     let param = [
         ("chat_id", chat_id),
         ("text", text),
-        ("parse_mode", "Markdown".to_string()),
     ];
 
     let res = state.http_client.post(&url)
