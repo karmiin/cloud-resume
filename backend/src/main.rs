@@ -205,7 +205,7 @@ async fn contact_handler(State(state): State<Arc<AppState>>,Json(payload): Json<
     }
 
     let text = format!(
-        "Nuovo Contatto dal Sito*\n\n *Nome:* {}\n *Email:* {}\n *Messaggio:* \n{}",
+        "Nuovo Contatto dal Sito\n\n Nome: {}\n Email: {}\n Messaggio: \n{}",
         payload.name, payload.email, payload.message
     );
 

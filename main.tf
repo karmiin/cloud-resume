@@ -187,7 +187,7 @@ resource "aws_lambda_function_url" "backend_url" {
      allow_origins     = ["*"]
     allow_methods     = ["*"]
     allow_headers     = ["*"]
-    expose_headers    = ["keep-alive", "date", "content-type"]
+    expose_headers    = ["keep-alive", "date", "content-type", "access-control-allow-origin"]
     max_age           = 86400
   }
 }

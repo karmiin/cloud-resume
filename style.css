@@ -96,7 +96,7 @@ section {
     visibility: hidden;
     transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
     transform: scale(0.95) translateY(20px);
-    padding: 80px 20px 100px; /* Space for dock */
+    padding: 60px 20px 100px; /* Reduced top padding from 80px to 60px */
     display: flex;
     /* justify-content: center; Removed to fix scrolling on mobile/long content */
     /* align-items: center; Removed to fix scrolling on mobile/long content */
@@ -114,10 +114,11 @@ section.active-section {
     max-width: 1200px;
     width: 100%;
     /* height: 100%; Removed to allow content to grow and scroll properly */
-    margin: auto; /* Centers content vertically and horizontally in the flex section */
+    margin: 0 auto; /* Changed from margin: auto to margin: 0 auto to align to top */
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: flex-start; /* Changed from center to flex-start to align content to top */
+    padding-top: 2vh; /* Add a little dynamic top padding */
 }
 
 /* --- Typography & Common --- */
@@ -810,7 +811,7 @@ input, textarea {
     /* Fix Layout Mobile: Rimuove centraggio verticale che taglia il contenuto */
     section {
         display: block; /* Importante: rimuove flex centering */
-        padding-top: 20px; /* Spazio minimo in alto */
+        padding-top: 40px; /* Increased from 20px to 40px for better spacing on mobile/tablet */
         padding-bottom: 35vh; /* Spazio abbondante in basso per la dock */
         overflow-y: auto;
     }
