@@ -58,6 +58,8 @@ jobs:
           TF_VAR_spotify_client_id: ${{ secrets.SPOTIFY_CLIENT_ID }}
           TF_VAR_spotify_client_secret: ${{ secrets.SPOTIFY_CLIENT_SECRET }}
           TF_VAR_spotify_refresh_token: ${{ secrets.SPOTIFY_REFRESH_TOKEN }}
+          TF_VAR_telegram_token: ${{ secrets.TELEGRAM_TOKEN }}
+          TF_VAR_telegram_chat_id: ${{ secrets.TELEGRAM_CHAT_ID }}
       
       - name: Deploy Frontend to S3
         run: |
