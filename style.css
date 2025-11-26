@@ -670,13 +670,14 @@ input, textarea {
         gap: 1rem;
     }
     .dock { width: 90%; justify-content: space-between; padding: 10px; }
-    section { padding-bottom: 120px; }
+    section { padding-bottom: 180px; }
 
     /* Spotify Widget Mobile Optimization */
     .spotify-widget {
         width: 100%;
         box-sizing: border-box;
         padding: 15px;
+        margin-bottom: 20px;
     }
 
     .spotify-body {
