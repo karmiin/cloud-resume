@@ -33,7 +33,7 @@ async fn main() -> Result<(), Error> {
 
     let app = Router::new()
         .route("/",get(root_handler))
-        .route("/api/", post(visitors_handler))
+        .route("/api/visitors", post(visitors_handler))
         .route("/api/github",get(github_handler))
         .route("/api/spotify",get(spotify_handler))
         .route("/api/email", post(email_handler))
