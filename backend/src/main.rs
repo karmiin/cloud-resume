@@ -193,7 +193,7 @@ async fn email_handler() -> Json<serde_json::Value> {
 }
 
 async fn blog_handler() -> Json<serde_json::Value> {
-    //prende da dynamo
+   
     Json(serde_json::json!({"posts": [{"title": "First Post", "date": "2024-01-01"}, {"title": "Second Post", "date": "2024-02-01"}]}))
 }
 

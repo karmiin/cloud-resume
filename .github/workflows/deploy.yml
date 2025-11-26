@@ -3,7 +3,7 @@ name: Deploy Cloud Resume
 on:
   push:
     branches:
-      - master # O "master", controlla come si chiama il tuo branch
+      - master 
 
 permissions:
   contents: read
@@ -13,18 +13,18 @@ jobs:
     name: Deploy Infrastructure & Website
     runs-on: ubuntu-latest
     
-    # Impostiamo le variabili d'ambiente per Terraform
+  
     env:
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       AWS_REGION: "eu-central-1"
 
     steps:
-      # 1. Scarica il codice dal repo
+     
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      # 2. Installa Rust + Cargo Lambda
+    
       - name: Setup Rust & Cargo Lambda
         uses: jaxxstorm/action-install-gh-release@v1.10.0
         with:
@@ -34,21 +34,21 @@ jobs:
       
       - name: Install Zig
         run: pip3 install ziglang
-      # 3. Compila il Backend (crea lo zip)
+
       - name: Build Backend
         run: |
           cd backend
           cargo lambda build --release --output-format zip
       
-      # 4. Installa Terraform
+     
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
 
-      # 5. Inizializza Terraform (si collega al bucket S3 dello stato)
+     
       - name: Terraform Init
         run: terraform init
 
-      # 6. Applica le modifiche (Infrastruttura + Backend Zip)
+      
       - name: Terraform Apply
         run: terraform apply -auto-approve
         env:
@@ -58,8 +58,7 @@ jobs:
           TF_VAR_spotify_client_id: ${{ secrets.SPOTIFY_CLIENT_ID }}
           TF_VAR_spotify_client_secret: ${{ secrets.SPOTIFY_CLIENT_SECRET }}
           TF_VAR_spotify_refresh_token: ${{ secrets.SPOTIFY_REFRESH_TOKEN }}
-      # 7. Carica il Frontend su S3
-      # Recuperiamo il nome del bucket dall'output di Terraform per non scriverlo a mano
+      
       - name: Deploy Frontend to S3
         run: |
           BUCKET_NAME=$(terraform output -raw resume_bucket_name) # Assicurati di avere questo output nel main.tf!
@@ -67,8 +66,8 @@ jobs:
           aws s3 cp style.css s3://$BUCKET_NAME/
           aws s3 cp script.js s3://$BUCKET_NAME/
           
-      # 8. Invalida la Cache CloudFront (così vedi subito le modifiche)
+      
       - name: Invalidate CloudFront
         run: |
-          DIST_ID=$(terraform output -raw cloudfront_id) # Assicurati di avere questo output nel main.tf!
+          DIST_ID=$(terraform output -raw cloudfront_id)
           aws cloudfront create-invalidation --distribution-id $DIST_ID --paths "/*"
