@@ -663,6 +663,32 @@ input, textarea {
 @media (max-width: 768px) {
     .hero-text h1 { font-size: 3rem; }
     .about-grid { grid-template-columns: 1fr; }
+    
+    /* Fix Layout Mobile: Rimuove centraggio verticale che taglia il contenuto */
+    section {
+        display: block; /* Importante: rimuove flex centering */
+        padding-top: 20px; /* Spazio minimo in alto */
+        padding-bottom: 35vh; /* Spazio abbondante in basso per la dock */
+        overflow-y: auto;
+    }
+
+    /* Eccezione per la Home: Centrata verticalmente */
+    #home {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        padding-top: 0;
+    }
+    
+    .content-wrapper {
+        height: auto; /* Altezza naturale */
+        min-height: auto;
+        justify-content: flex-start; /* Allinea tutto in alto */
+        display: flex;
+        flex-direction: column;
+    }
+
     .hud-grid { 
         grid-template-columns: 1fr; 
         display: flex;
@@ -670,7 +696,6 @@ input, textarea {
         gap: 1rem;
     }
     .dock { width: 90%; justify-content: space-between; padding: 10px; }
-    section { padding-bottom: 180px; }
 
     /* Spotify Widget Mobile Optimization */
     .spotify-widget {
