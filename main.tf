@@ -188,8 +188,7 @@ resource "aws_lambda_function_url" "backend_url" {
   authorization_type = "NONE" # Pubblico
 
   cors {
-    allow_credentials = true
-    allow_origins     = ["*"] # Per ora permettiamo a tutti di chiamarla
+     allow_origins     = ["*"]
     allow_methods     = ["*"]
     allow_headers     = ["date", "keep-alive"]
     expose_headers    = ["keep-alive", "date"]

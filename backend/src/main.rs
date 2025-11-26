@@ -26,10 +26,10 @@ async fn main() -> Result<(), Error> {
         http_client,
     });
 
-    let cors = CorsLayer::new()
-    .allow_origin(Any)
-    .allow_methods(Any)
-    .allow_headers(Any);
+    //let cors = CorsLayer::new()
+    //.allow_origin(Any)
+    //.allow_methods(Any)
+    //.allow_headers(Any);
 
     let app = Router::new()
         .route("/",get(root_handler))
@@ -38,7 +38,7 @@ async fn main() -> Result<(), Error> {
         .route("/api/spotify",get(spotify_handler))
         .route("/api/email", post(email_handler))
         .route("/api/blog", get(blog_handler))
-        .layer(cors)
+        //.layer(cors)
         .with_state(shared_state);
 
     run(app).await
