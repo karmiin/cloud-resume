@@ -1,3 +1,4 @@
+use aws_sdk_dynamodb::types::AttributeValue;
 use axum::{
     routing::{get, post},
     Router, Json, extract::State,
@@ -32,7 +33,7 @@ async fn main() -> Result<(), Error> {
 
     let app = Router::new()
         .route("/",get(root_handler))
-        .route("/api/visitors", post(visitors_handler))
+        .route("/api/", post(visitors_handler))
         .route("/api/github",get(github_handler))
         .route("/api/spotify",get(spotify_handler))
         .route("/api/email", post(email_handler))
@@ -47,9 +48,30 @@ async fn root_handler() -> &'static str {
     "Backend Rust Online!"
 }
 
-async fn visitors_handler() -> Json<serde_json::Value> {
+async fn visitors_handler(State(state): State<Arc<AppState>>) -> Json<serde_json::Value> {
     //prende da dynamo
-    Json(serde_json::json!({"visitors": 10}))
+    let client = &state.dynamo_client;
+
+    let res = client
+    .update_item()
+    .table_name("VisitorCount")
+    .key("id", AttributeValue::S("count".to_string()))
+    .update_expression("ADD visits :incr")
+    .expression_attribute_values(":incr", AttributeValue::N("1".to_string()))
+    .return_values(aws_sdk_dynamodb::types::ReturnValue::UpdatedNew)
+    .send()
+    .await;
+
+    match res {
+        Ok(output) => {
+            let attributes = output.attributes.unwrap_or_default();
+            let val = attributes.get("visits").unwrap();
+            let count = val.as_n().unwrap_or(&"0".to_string()).to_string();
+            Json(serde_json::json!({"visitors": count}))
+        }
+        
+        Err(_) => Json(serde_json::json!({"error": "DB Error", "visitors": 0})),
+    }
 }
 
 async fn github_handler() -> Json<serde_json::Value> {

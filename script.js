@@ -3,7 +3,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- NAVIGATION LOGIC ---
     const dockItems = document.querySelectorAll('.dock-item');
     const sections = document.querySelectorAll('section');
-    const API_URL = "https://ljjjjnmeisku6y3rvurca2rtii0prxjy.lambda-url.eu-central-1.on.aws";
 
     dockItems.forEach(item => {
         item.addEventListener('click', () => {
@@ -18,6 +17,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 section.classList.remove('active-section');
                 if (section.id === targetId) {
                     section.classList.add('active-section');
+
+                    if(targetId == 'feed'){
+                        const listItems = document.querySelectorAll('.log-list li');
+                        listItems.forEach((li, index) => {
+                            li.style.animation = 'none';
+                            li.offsetHeight; // Trigger reflow
+                            li.style.opacity = '0';
+                            li.style.animation = `fadeIn 0.5s ease forwards ${index * 0.2}s`;
+                           
+                        });
+                    }
                 }
             });
         });
@@ -104,21 +114,21 @@ document.addEventListener('DOMContentLoaded', () => {
     animate();
 
 
-    // --- VISITOR COUNTER ---
+   
     const counterElement = document.getElementById('visitor-counter');
-
+    API_URL = "https://ljjjjnmeisku6y3rvurca2rtii0prxjy.lambda-url.eu-central-1.on.aws";
     fetch(API_URL + '/api/visitors')
         .then(response => response.json())
         .then(data => {
-            counterElement.innerText = data.count || "Error";
-            counterElement.classList.add('blink'); // Add effect on load
+            counterElement.innerText = data.visitors;
+            counterElement.classList.add('blink'); 
         })
         .catch(error => {
             console.error('Error fetching visitor count:', error);
             counterElement.innerText = "Offline";
             counterElement.style.color = "var(--accent-red)";
         });
-
+    
 
     // --- CONTACT FORM SIMULATION ---
     const contactForm = document.getElementById('contact-form');
@@ -163,6 +173,10 @@ document.addEventListener('DOMContentLoaded', () => {
             50% { transform: translate(-50%, -50%) translateY(-10px); }
             100% { transform: translate(-50%, -50%) translateY(0px); }
         }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
     `;
     document.head.appendChild(styleSheet);
 
@@ -192,50 +206,27 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- SPOTIFY WIDGET LOGIC ---
-    const tracks = [
-        { title: "Neural Net Dreams", artist: "Synthwave Boy" },
-        { title: "Deploying to Prod", artist: "The DevOps" },
-        { title: "Rust in Peace", artist: "Megadeth (Cover)" },
-        { title: "Cloud City", artist: "Lando" },
-        { title: "Infinite Loop", artist: "While(True)" }
-    ];
 
-    const trackEl = document.getElementById('spotify-track');
-    const artistEl = document.getElementById('spotify-artist');
-    
-if (trackEl && artistEl) {
-    let currentTrackIndex = 0;
-    
-    function updateTrack() {
-        const track = tracks[currentTrackIndex];
-        trackEl.textContent = track.title;
-        artistEl.textContent = track.artist;
-        
-        currentTrackIndex = (currentTrackIndex + 1) % tracks.length;
-    }
-
-    // Change track every 30 seconds (simulating song end)
-    setInterval(updateTrack, 30000);
-}
 
 async function fetchGithubActivity(){
     const logList = document.querySelector('.log-list');
 
     try{
+        API_URL = "https://ljjjjnmeisku6y3rvurca2rtii0prxjy.lambda-url.eu-central-1.on.aws";
         const response = await fetch(API_URL + '/api/github')
 
         if(!response.ok)
             throw new Error('error ' + response.status);
 
         const data = await response.json();
-
+        console.log(data);
         if(!Array.isArray(data)) return;
 
         logList.innerHTML = '';
 
         data.forEach((event, index) =>{
-            const actionType = event.type.replace('Event', '').toUpperCase();
+            const rawType = event.event_type || 'Event';
+            const actionType = rawType.replace('Event', '').toUpperCase();
             const repoName = event.repo;
             const message = event.message;
 
@@ -246,8 +237,8 @@ async function fetchGithubActivity(){
             ${message}
             `;
 
-            li.style.animation = `fadeIn 0.5s ease forwards ${index * 0.2}s`;
-            li.style.opacity = 0;
+            //li.style.animation = `fadeIn 0.5s ease forwards ${index * 0.2}s`;
+            li.style.opacity = '0';
             
             logList.appendChild(li);
         });
@@ -257,9 +248,6 @@ async function fetchGithubActivity(){
     }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-    fetchGithubActivity();
-});
 
 
 async function fetchSpotifyStatus() {
@@ -273,6 +261,7 @@ async function fetchSpotifyStatus() {
     const statusIcon = widget.querySelector('.status-icon'); // Se hai un'icona di stato
 
     try {
+        API_URL = "https://ljjjjnmeisku6y3rvurca2rtii0prxjy.lambda-url.eu-central-1.on.aws";
         const response = await fetch(API_URL +'/api/spotify');
         const data = await response.json();
 
