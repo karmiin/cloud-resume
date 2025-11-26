@@ -324,7 +324,7 @@ document.addEventListener('DOMContentLoaded', () => {
         svg.innerHTML = '';
 
         // Helper to create SVG line
-        const createLine = (x1, y1, x2, y2) => {
+        const createLine = (x1, y1, x2, y2, startId, endId) => {
             const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
             line.setAttribute('x1', `${x1}%`);
             line.setAttribute('y1', `${y1}%`);
@@ -332,6 +332,8 @@ document.addEventListener('DOMContentLoaded', () => {
             line.setAttribute('y2', `${y2}%`);
             line.setAttribute('stroke', 'rgba(0, 243, 255, 0.2)');
             line.setAttribute('stroke-width', '1');
+            line.setAttribute('data-start', startId);
+            line.setAttribute('data-end', endId);
             return line;
         };
 
@@ -340,23 +342,106 @@ document.addEventListener('DOMContentLoaded', () => {
             if (skill.parent) {
                 const parent = skillsData.find(s => s.id === skill.parent);
                 if (parent) {
-                    svg.appendChild(createLine(skill.x, skill.y, parent.x, parent.y));
+                    svg.appendChild(createLine(skill.x, skill.y, parent.x, parent.y, skill.id, parent.id));
                 }
             }
         });
 
-        // 2. Draw Nodes
+        // 2. Draw Nodes with Drag Support
         skillsData.forEach(skill => {
             const node = document.createElement('div');
             node.className = 'skill-node';
             node.textContent = skill.label;
             node.style.left = `${skill.x}%`;
             node.style.top = `${skill.y}%`;
+            node.setAttribute('data-id', skill.id);
             
+            // Click for details
             node.addEventListener('click', (e) => {
-                e.stopPropagation(); // Prevent closing when clicking node
+                if (node.getAttribute('data-dragging') === 'true') return;
+                e.stopPropagation(); 
                 showSkillDetails(skill, node);
             });
+
+            // Drag Logic
+            let isDragging = false;
+            let startX, startY, startLeft, startTop;
+
+            const onMouseDown = (e) => {
+                // Only left click or touch
+                if (e.type === 'mousedown' && e.button !== 0) return;
+                
+                isDragging = true;
+                node.setAttribute('data-dragging', 'false'); // Reset
+                
+                const clientX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+                const clientY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
+                
+                startX = clientX;
+                startY = clientY;
+                
+                const rect = node.getBoundingClientRect();
+                const parentRect = container.getBoundingClientRect();
+                
+                // Calculate current % position
+                startLeft = (rect.left - parentRect.left + rect.width / 2) / parentRect.width * 100;
+                startTop = (rect.top - parentRect.top + rect.height / 2) / parentRect.height * 100;
+
+                document.addEventListener(e.type === 'mousedown' ? 'mousemove' : 'touchmove', onMouseMove);
+                document.addEventListener(e.type === 'mousedown' ? 'mouseup' : 'touchend', onMouseUp);
+            };
+
+            const onMouseMove = (e) => {
+                if (!isDragging) return;
+                node.setAttribute('data-dragging', 'true');
+                e.preventDefault(); // Prevent scrolling on touch
+
+                const clientX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+                const clientY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
+
+                const deltaX = clientX - startX;
+                const deltaY = clientY - startY;
+
+                const parentRect = container.getBoundingClientRect();
+                
+                // Convert delta to %
+                const deltaXPercent = (deltaX / parentRect.width) * 100;
+                const deltaYPercent = (deltaY / parentRect.height) * 100;
+
+                const newLeft = Math.max(0, Math.min(100, startLeft + deltaXPercent));
+                const newTop = Math.max(0, Math.min(100, startTop + deltaYPercent));
+
+                node.style.left = `${newLeft}%`;
+                node.style.top = `${newTop}%`;
+
+                // Update Lines
+                const id = skill.id;
+                const lines = svg.querySelectorAll('line');
+                lines.forEach(line => {
+                    if (line.getAttribute('data-start') === id) {
+                        line.setAttribute('x1', `${newLeft}%`);
+                        line.setAttribute('y1', `${newTop}%`);
+                    }
+                    if (line.getAttribute('data-end') === id) {
+                        line.setAttribute('x2', `${newLeft}%`);
+                        line.setAttribute('y2', `${newTop}%`);
+                    }
+                });
+            };
+
+            const onMouseUp = (e) => {
+                if (!isDragging) return;
+                isDragging = false;
+                document.removeEventListener(e.type === 'mouseup' ? 'mousemove' : 'touchmove', onMouseMove);
+                document.removeEventListener(e.type === 'mouseup' ? 'mouseup' : 'touchend', onMouseUp);
+                
+                // Update skill data (optional, but good for consistency if we re-render)
+                // skill.x = parseFloat(node.style.left);
+                // skill.y = parseFloat(node.style.top);
+            };
+
+            node.addEventListener('mousedown', onMouseDown);
+            node.addEventListener('touchstart', onMouseDown, { passive: false });
 
             container.appendChild(node);
         });
