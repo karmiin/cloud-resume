@@ -663,9 +663,47 @@ input, textarea {
 @media (max-width: 768px) {
     .hero-text h1 { font-size: 3rem; }
     .about-grid { grid-template-columns: 1fr; }
-    .hud-grid { grid-template-columns: 1fr; }
+    .hud-grid { 
+        grid-template-columns: 1fr; 
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
     .dock { width: 90%; justify-content: space-between; padding: 10px; }
     section { padding-bottom: 120px; }
+
+    /* Spotify Widget Mobile Optimization */
+    .spotify-widget {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 15px;
+    }
+
+    .spotify-body {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .album-cover {
+        width: 50px !important;
+        height: 50px !important;
+        min-width: 50px;
+    }
+
+    .track-details {
+        flex: 1;
+        min-width: 0;
+        text-align: left;
+    }
+
+    .song-title, .artist-name {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: block;
+        max-width: 100%;
+    }
 }
 
 /* --- BLOG POST VIEW --- */
