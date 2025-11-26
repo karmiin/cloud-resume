@@ -199,7 +199,14 @@ async fn contact_handler(State(state): State<Arc<AppState>>,Json(payload): Json<
     
     let token = env::var("TELEGRAM_TOKEN").unwrap_or_default();
     let chat_id = env::var("TELEGRAM_CHAT_ID").unwrap_or_default();
+
+    let masked_token = if token.len() >5 { &token[..5] } else { &token };
+    println!("DEBUG: Token loded stars with '{}...'", masked_token);
+    println!("DEBUG: Chat ID loaded '{}'", chat_id);
+    println!("DEBUG: Payload received: Name: '{}', Email: '{}', Message: '{}'", payload.name, payload.email, payload.message);
+
     if token.is_empty() || chat_id.is_empty() {
+        println!("ERROR: Telegram credentials are missing.");
         return Json(serde_json::json!({"success": "false", "error": "Telegram credentials missing"}));
     }
 
@@ -222,8 +229,20 @@ async fn contact_handler(State(state): State<Arc<AppState>>,Json(payload): Json<
         .await;
 
     match res{
-        Ok(_) => Json(serde_json::json!({"success": "true"})),
-        Err(_) => return Json(serde_json::json!({"success": "false", "error": "Failed to send message"})),
+        Ok(resp) => {
+            let status = resp.status();
+            let body = resp.text().await.unwrap_or_default();
+            if status.is_success(){
+                     Json(serde_json::json!({"success": "true"}))
+            }
+            else{ 
+                Json(serde_json::json!({"success": "false", "error": format!("Telegram API error: {}", body)}))
+            }
+        
+        },
+        Err(err) => {
+            println!("ERRORE: {:?}",err);
+             Json(serde_json::json!({"success": "false", "error": "Failed to send message"}))
     }
 }
 
