@@ -130,7 +130,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     
 
-    // --- CONTACT FORM SIMULATION ---
+    
     const contactForm = document.getElementById('contact-form');
     if (contactForm) {
         contactForm.addEventListener('submit', async (e) => {

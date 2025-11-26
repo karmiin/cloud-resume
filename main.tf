@@ -196,8 +196,8 @@ resource "aws_lambda_function_url" "backend_url" {
   cors {
      allow_origins     = ["*"]
     allow_methods     = ["*"]
-    allow_headers     = ["date", "keep-alive"]
-    expose_headers    = ["keep-alive", "date"]
+    allow_headers     = ["*"]
+    expose_headers    = ["keep-alive", "date", "content-type"]
     max_age           = 86400
   }
 }
