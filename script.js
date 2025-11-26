@@ -117,7 +117,7 @@ document.addEventListener('DOMContentLoaded', () => {
    
     const counterElement = document.getElementById('visitor-counter');
     API_URL = "https://ljjjjnmeisku6y3rvurca2rtii0prxjy.lambda-url.eu-central-1.on.aws";
-    fetch(API_URL + '/api/visitors')
+    fetch(API_URL + '/api/visitors', { method: 'POST' })
         .then(response => response.json())
         .then(data => {
             counterElement.innerText = data.visitors;

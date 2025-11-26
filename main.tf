@@ -71,17 +71,19 @@ output "website_url" {
 
 # 6. Creiamo la distribuzione CloudFront (CDN)
 resource "aws_cloudfront_distribution" "s3_distribution" {
+  aliases = ["karmin.dev", "www.karmin.dev"]
+
   origin {
-    # Diciamo a CloudFront di prendere i file dal "Website Endpoint" del bucket S3
     domain_name = aws_s3_bucket_website_configuration.resume_bucket_website.website_endpoint
     origin_id   = "S3-Website-${aws_s3_bucket.resume_bucket.id}"
-
+    
     custom_origin_config {
       http_port              = 80
       https_port             = 443
-      origin_protocol_policy = "http-only" # S3 Website supporta solo HTTP, CloudFront ci mette HTTPS davanti
+      origin_protocol_policy = "http-only"
       origin_ssl_protocols   = ["TLSv1.2"]
     }
+
   }
 
   enabled             = true
@@ -113,7 +115,9 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
   }
 
   viewer_certificate {
-    cloudfront_default_certificate = true # Usiamo il certificato gratis di AWS
+    acm_certificate_arn      = data.aws_acm_certificate.cert.arn
+    ssl_support_method       = "sni-only"
+    minimum_protocol_version = "TLSv1.2_2021"
   }
 }
 
@@ -265,3 +269,29 @@ output "resume_bucket_name" {
 output "cloudfront_id" {
   value = aws_cloudfront_distribution.s3_distribution.id
 }
+
+resource "aws_route53_record" "www" {
+  zone_id = data.aws_route53_zone.main.zone_id
+  name    = "www.karmin.dev"
+  type    = "A"
+
+  alias {
+    name                   = aws_cloudfront_distribution.s3_distribution.domain_name
+    zone_id                = aws_cloudfront_distribution.s3_distribution.hosted_zone_id
+    evaluate_target_health = false
+  }
+}
+provider "aws" {
+  alias = "virginia"
+  region = "us-east-1"
+}
+
+data "aws_acm_certificate" "cert" {
+  domain = "karmin.dev"
+  statuses = ["ISSUED"]
+  provider = aws.virginia
+}
+data "aws_route53_zone" "main"{
+  name = "karmin.dev"
+}
+
